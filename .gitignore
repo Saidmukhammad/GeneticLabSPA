@@ -1,0 +1,12 @@
+# Dependencies (Playwright is linked from the global install — see README)
+node_modules/
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+*~
+*.bak
+*.orig
