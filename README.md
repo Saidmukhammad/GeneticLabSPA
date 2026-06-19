@@ -128,6 +128,28 @@ chrome --headless=new --dump-dom "http://localhost:8000/index.html?selftest" \
 
 The suite has no effect on normal use — it only runs when the flag is present.
 
+## Admin mode — logging in
+
+There is **no default password**. The admin passphrase is one you set yourself the
+first time you enter admin mode; it is stored only as a SHA-256 hash (never in
+plaintext) under the `glab_v1_` keys.
+
+1. In the app, click the **Admin** button in the header (shown whenever you are not
+   already in admin mode).
+2. **First time** — the dialog reads *Set admin passphrase*. Type a passphrase and
+   press **Set & enter**; that value becomes the admin passphrase and you are taken
+   straight into admin mode.
+3. **Afterwards** — the dialog reads *Enter admin mode*. Type the same passphrase and
+   press **Unlock**. A wrong value shows *Incorrect passphrase*.
+4. To leave admin mode, click the small **exit** link next to the admin indicator.
+
+**Forgot it?** Only the hash is stored, so it cannot be recovered — clear the
+`glab_v1_*` keys in dev tools (or **Reset all data** below) and the gate will prompt
+you to *set* a new one. Note this also wipes the seeded demo data.
+
+> Admin mode is a **workflow guard** against accidental edits (adding/editing tests,
+> kits and departments), **not real security**.
+
 ## Data reset
 
 Admin → gear menu → **Reset all data** wipes `localStorage` and re-seeds the demo data.
