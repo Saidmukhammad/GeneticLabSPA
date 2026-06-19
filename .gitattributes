@@ -1,0 +1,6 @@
+# Normalize all text to LF in the repo and on checkout, so copying between the
+# LF origin folder and the working tree never shows up as a whole-file diff.
+* text=auto eol=lf
+
+# Binary assets — never touch line endings or try to diff/merge them.
+*.png binary

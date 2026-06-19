@@ -320,6 +320,9 @@ class App extends Runtime {
     window.addEventListener('hashchange',()=>{ const r=this.routeFromHash(); const patch={route:r, modalTestId:null}; if(r==='dashboard'&&!this.state.logForm.id&&!this.state.logForm.patientCode){ patch.logForm={...this.state.logForm,patientCode:this.nextPatientCode()}; } this.setState(patch); });
     window.addEventListener('keydown',(e)=>{ if((e.key==='k'||e.key==='K')&&(e.metaKey||e.ctrlKey)){ e.preventDefault(); if(this.state.cmdkOpen)this.closeCmdk(); else this.openCmdk(); return; } if(e.key==='Tab'){ this.trapTab(e); } if(e.key==='Escape'){ const st=this.state; if(st.cmdkOpen){ this.closeCmdk(); } else if(st.confirm){ this.closeConfirm(); } else if(st.reorderModalOpen){ this.closeReorder(); } else if(st.ncrModalOpen){ this.closeNcrModal(); } else if(st.actorModalOpen){ this.closeActorModal(); } else if(st.auditOpen){ this.closeAudit(); } else if(st.deptModalOpen){ this.closeDeptModal(); } else if(st.kitForm){ this.requestCloseKitForm(); } else if(st.testForm){ this.requestCloseTestForm(); } else if(st.faqGuideId){ this.closeGuide(); } else { this.setState({modalTestId:null,adminGateOpen:false,adminMenu:false}); } } });
     window.addEventListener('click',()=>{ if(this.state.adminMenu) this.setState({adminMenu:false}); });
+    // Another tab wrote to our store — this tab's in-memory state is now stale.
+    // Warn (throttled) so a later save here doesn't silently clobber the other tab.
+    window.addEventListener('storage',(e)=>{ if(!e.key||e.key.indexOf(this.KEY)!==0) return; const now=Date.now(); if(this._lastStorageWarn&&now-this._lastStorageWarn<4000) return; this._lastStorageWarn=now; this.toast('Data changed in another tab — reload to avoid overwriting it','warn'); });
     const boot={ready:true,tests,kits,departments,logs,audit,ncrs,meta,theme,route};
     if(route==='dashboard'&&!this.state.logForm.id&&!this.state.logForm.patientCode){ boot.logForm={...this.state.logForm,patientCode:this.nextPatientCodeFrom(logs)}; }
     this.setState(boot);
@@ -526,7 +529,7 @@ class App extends Runtime {
   // ---------- exports ----------
   download(name,content,type){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); }
   exportTestsJson(){ this.download('tests-export-'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(this.state.tests,null,2),'application/json'); this.toast('Tests catalog exported (JSON)','good'); }
-  toCsv(rows){ const esc=v=>{ v=(v==null?'':String(v)); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }; return '﻿'+rows.map(r=>r.map(esc).join(',')).join('\r\n'); }
+  toCsv(rows){ const esc=v=>{ v=(v==null?'':String(v)); if(/^[=+\-@\t\r]/.test(v)&&!/^-?\d+(\.\d+)?$/.test(v)) v="'"+v; return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }; return '﻿'+rows.map(r=>r.map(esc).join(',')).join('\r\n'); }
 
   // ---------- render view-models ----------
   renderVals(){
